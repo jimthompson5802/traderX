@@ -66,6 +66,12 @@
             "description": "User who submits trades, manages accounts, and monitors positions through the web interface"
         },
         {
+            "unique-id": "trading-system",
+            "node-type": "system",
+            "name": "Trading System",
+            "description": "Complete trading system encompassing all services, data stores, and client interfaces for trade execution and management"
+        },
+        {
             "unique-id": "web-gui",
             "node-type": "webclient",
             "name": "Web GUI",
@@ -369,6 +375,38 @@
         }
     ],
     "relationships": [
+        {
+            "unique-id": "trading-system-composition",
+            "relationship-type": {
+                "composed-of": {
+                    "container": "trading-system",
+                    "nodes": [
+                        "web-gui",
+                        "account-service",
+                        "trade-service",
+                        "position-service",
+                        "trade-processor",
+                        "security-master",
+                        "people-service",
+                        "trade-data-store",
+                        "trade-feed"
+                    ]
+                }
+            },
+            "description": "Trading System composed of all core services, databases, and client interfaces excluding external actors and directories",
+            "parties": [
+                "trading-system",
+                "web-gui",
+                "account-service",
+                "trade-service",
+                "position-service",
+                "trade-processor",
+                "security-master",
+                "people-service",
+                "trade-data-store",
+                "trade-feed"
+            ]
+        },
         {
             "unique-id": "trader-to-web-gui",
             "relationship-type": {

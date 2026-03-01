@@ -28,37 +28,225 @@
             "unique-id": "account-service",
             "node-type": "service",
             "name": "Account Service",
-            "description": "Manages account creation, updates, user associations, and account inquiries by interfacing with the Trade Data Store"
+            "description": "Manages account creation, updates, user associations, and account inquiries by interfacing with the Trade Data Store",
+            "interfaces": [
+                {
+                    "unique-id": "account-service-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/account/{id}",
+                                "method": "GET",
+                                "description": "Retrieve account by ID"
+                            },
+                            {
+                                "path": "/account/",
+                                "method": "POST",
+                                "description": "Create new account"
+                            },
+                            {
+                                "path": "/account/",
+                                "method": "PUT",
+                                "description": "Update existing account"
+                            },
+                            {
+                                "path": "/account/",
+                                "method": "GET",
+                                "description": "Get all accounts"
+                            },
+                            {
+                                "path": "/accountuser/{id}",
+                                "method": "GET",
+                                "description": "Get account user by ID"
+                            },
+                            {
+                                "path": "/accountuser/",
+                                "method": "POST",
+                                "description": "Create account user association"
+                            },
+                            {
+                                "path": "/accountuser/",
+                                "method": "PUT",
+                                "description": "Update account user association"
+                            },
+                            {
+                                "path": "/accountuser/",
+                                "method": "GET",
+                                "description": "Get all account users"
+                            }
+                        ],
+                        "port": 18088
+                    }
+                }
+            ]
         },
         {
             "unique-id": "trade-service",
             "node-type": "service",
             "name": "Trade Service",
-            "description": "Handles trade submission, validates tickers and accounts, and publishes new trade events to the Trade Feed"
+            "description": "Handles trade submission, validates tickers and accounts, and publishes new trade events to the Trade Feed",
+            "interfaces": [
+                {
+                    "unique-id": "trade-service-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/trade/",
+                                "method": "POST",
+                                "description": "Submit a new trade order"
+                            }
+                        ],
+                        "port": 18092
+                    }
+                }
+            ]
         },
         {
             "unique-id": "position-service",
             "node-type": "service",
             "name": "Position Service",
-            "description": "Provides trade and position data for account blotters by querying the Trade Data Store"
+            "description": "Provides trade and position data for account blotters by querying the Trade Data Store",
+            "interfaces": [
+                {
+                    "unique-id": "position-service-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/trades/{accountId}",
+                                "method": "GET",
+                                "description": "Get trades by account ID"
+                            },
+                            {
+                                "path": "/trades/",
+                                "method": "GET",
+                                "description": "Get all trades"
+                            },
+                            {
+                                "path": "/positions/{accountId}",
+                                "method": "GET",
+                                "description": "Get positions by account ID"
+                            },
+                            {
+                                "path": "/positions/",
+                                "method": "GET",
+                                "description": "Get all positions"
+                            },
+                            {
+                                "path": "/health/ready",
+                                "method": "GET",
+                                "description": "Health check ready status"
+                            },
+                            {
+                                "path": "/health/alive",
+                                "method": "GET",
+                                "description": "Health check alive status"
+                            }
+                        ],
+                        "port": 18090
+                    }
+                }
+            ]
         },
         {
             "unique-id": "trade-processor",
             "node-type": "service",
             "name": "Trade Processor",
-            "description": "Processes trade events asynchronously, updates trades and positions in the Trade Data Store, and publishes status updates"
+            "description": "Processes trade events asynchronously, updates trades and positions in the Trade Data Store, and publishes status updates",
+            "interfaces": [
+                {
+                    "unique-id": "trade-processor-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/tradeservice/order",
+                                "method": "POST",
+                                "description": "Process trade order"
+                            }
+                        ],
+                        "port": 18091
+                    }
+                }
+            ]
         },
         {
             "unique-id": "security-master",
             "node-type": "service",
             "name": "Security Master",
-            "description": "Maintains the list of tradeable securities and company information, loaded from CSV file, used for ticker validation"
+            "description": "Maintains the list of tradeable securities and company information, loaded from CSV file, used for ticker validation",
+            "interfaces": [
+                {
+                    "unique-id": "security-master-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/stocks",
+                                "method": "GET",
+                                "description": "Get all stocks"
+                            },
+                            {
+                                "path": "/stocks/{ticker}",
+                                "method": "GET",
+                                "description": "Get stock by ticker symbol"
+                            },
+                            {
+                                "path": "/health",
+                                "method": "GET",
+                                "description": "Health check"
+                            }
+                        ],
+                        "port": 18085
+                    }
+                }
+            ]
         },
         {
             "unique-id": "people-service",
             "node-type": "service",
             "name": "People Service",
-            "description": "Provides user search and retrieval from the User Directory for account association workflows"
+            "description": "Provides user search and retrieval from the User Directory for account association workflows",
+            "interfaces": [
+                {
+                    "unique-id": "people-service-api",
+                    "interface-type": "api",
+                    "protocol": "REST",
+                    "data-format": "JSON",
+                    "specification": {
+                        "endpoints": [
+                            {
+                                "path": "/People/GetPerson",
+                                "method": "GET",
+                                "description": "Get a person from directory by logon or employee ID"
+                            },
+                            {
+                                "path": "/People/GetMatchingPeople",
+                                "method": "GET",
+                                "description": "Get all people whose logonId or full name contain the search text"
+                            },
+                            {
+                                "path": "/People/ValidatePerson",
+                                "method": "GET",
+                                "description": "Validate a person against the directory"
+                            }
+                        ],
+                        "port": 18089
+                    }
+                }
+            ]
         },
         {
             "unique-id": "trade-data-store",
@@ -76,7 +264,61 @@
             "unique-id": "trade-feed",
             "node-type": "service",
             "name": "Trade Feed",
-            "description": "Real-time event streaming service publishing trade execution, position updates, and trade status notifications to subscribers"
+            "description": "Real-time event streaming service publishing trade execution, position updates, and trade status notifications to subscribers",
+            "interfaces": [
+                {
+                    "unique-id": "trade-feed-websocket",
+                    "interface-type": "api",
+                    "protocol": "WebSocket",
+                    "data-format": "JSON",
+                    "specification": {
+                        "technology": "Socket.IO",
+                        "port": 18086,
+                        "endpoints": [
+                            {
+                                "path": "/",
+                                "method": "GET",
+                                "description": "HTML viewer page for monitoring published messages in real-time"
+                            }
+                        ],
+                        "socket-commands": [
+                            {
+                                "command": "subscribe",
+                                "direction": "client-to-server",
+                                "description": "Subscribe to a topic to receive published messages"
+                            },
+                            {
+                                "command": "unsubscribe",
+                                "direction": "client-to-server",
+                                "description": "Unsubscribe from a topic to stop receiving messages"
+                            },
+                            {
+                                "command": "publish",
+                                "direction": "bidirectional",
+                                "description": "Publish a message to a topic; server also emits this event to subscribers"
+                            }
+                        ],
+                        "topics": [
+                            {
+                                "pattern": "/trades",
+                                "description": "Trade order events for processing"
+                            },
+                            {
+                                "pattern": "/accounts/{accountId}/trades",
+                                "description": "Account-specific trade events"
+                            },
+                            {
+                                "pattern": "/accounts/{accountId}/positions",
+                                "description": "Account-specific position updates"
+                            },
+                            {
+                                "pattern": "/*",
+                                "description": "Global wildcard topic for monitoring all traffic"
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     ],
     "relationships": [

@@ -1,0 +1,324 @@
+{
+    "$schema": "https://calm.finos.org/release/1.2/meta/calm.json",
+    "unique-id": "trading-system",
+    "name": "Trading System",
+    "description": "An event-driven trading system architecture supporting order submission, account management, position tracking, and real-time trade updates",
+    "metadata": [
+        {
+            "version": "1.0.0",
+            "created-by": "Architecture Team",
+            "business-domain": "Capital Markets",
+            "architecture-style": "Event-Driven"
+        }
+    ],
+    "nodes": [
+        {
+            "unique-id": "trader",
+            "node-type": "actor",
+            "name": "Trader",
+            "description": "User who submits trades, manages accounts, and monitors positions through the web interface"
+        },
+        {
+            "unique-id": "web-gui",
+            "node-type": "webclient",
+            "name": "Web GUI",
+            "description": "User interface for submitting trades, viewing positions, managing accounts, and displaying real-time updates"
+        },
+        {
+            "unique-id": "account-service",
+            "node-type": "service",
+            "name": "Account Service",
+            "description": "Manages account creation, updates, user associations, and account inquiries by interfacing with the Trade Data Store"
+        },
+        {
+            "unique-id": "trade-service",
+            "node-type": "service",
+            "name": "Trade Service",
+            "description": "Handles trade submission, validates tickers and accounts, and publishes new trade events to the Trade Feed"
+        },
+        {
+            "unique-id": "position-service",
+            "node-type": "service",
+            "name": "Position Service",
+            "description": "Provides trade and position data for account blotters by querying the Trade Data Store"
+        },
+        {
+            "unique-id": "trade-processor",
+            "node-type": "service",
+            "name": "Trade Processor",
+            "description": "Processes trade events asynchronously, updates trades and positions in the Trade Data Store, and publishes status updates"
+        },
+        {
+            "unique-id": "security-master",
+            "node-type": "service",
+            "name": "Security Master",
+            "description": "Maintains the list of tradeable securities and company information, loaded from CSV file, used for ticker validation"
+        },
+        {
+            "unique-id": "people-service",
+            "node-type": "service",
+            "name": "People Service",
+            "description": "Provides user search and retrieval from the User Directory for account association workflows"
+        },
+        {
+            "unique-id": "trade-data-store",
+            "node-type": "database",
+            "name": "Trade Data Store",
+            "description": "Central repository storing trading accounts, executed trades, positions, and related transactional data"
+        },
+        {
+            "unique-id": "user-directory",
+            "node-type": "database",
+            "name": "User Directory",
+            "description": "Stores user profiles and contact information supporting authentication and search operations"
+        },
+        {
+            "unique-id": "trade-feed",
+            "node-type": "service",
+            "name": "Trade Feed",
+            "description": "Real-time event streaming service publishing trade execution, position updates, and trade status notifications to subscribers"
+        }
+    ],
+    "relationships": [
+        {
+            "unique-id": "trader-to-web-gui",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trader"
+                    },
+                    "destination": {
+                        "node": "web-gui"
+                    }
+                }
+            },
+            "description": "Trader interacts with Web GUI to submit trades, view positions, and manage accounts",
+            "parties": ["trader", "web-gui"]
+        },
+        {
+            "unique-id": "web-gui-to-account-service",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "account-service"
+                    }
+                }
+            },
+            "description": "Web GUI requests account list, creates/updates accounts, and manages user associations",
+            "parties": ["web-gui", "account-service"]
+        },
+        {
+            "unique-id": "web-gui-to-position-service",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "position-service"
+                    }
+                }
+            },
+            "description": "Web GUI requests trades and positions for selected account to initialize blotter",
+            "parties": ["web-gui", "position-service"]
+        },
+        {
+            "unique-id": "web-gui-to-security-master",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "security-master"
+                    }
+                }
+            },
+            "description": "Web GUI retrieves list of valid tickers for trade submission",
+            "parties": ["web-gui", "security-master"]
+        },
+        {
+            "unique-id": "web-gui-to-trade-service",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "trade-service"
+                    }
+                }
+            },
+            "description": "Web GUI submits trade requests containing account, ticker, side, and quantity",
+            "parties": ["web-gui", "trade-service"]
+        },
+        {
+            "unique-id": "web-gui-to-people-service",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "people-service"
+                    }
+                }
+            },
+            "description": "Web GUI searches for users to associate with accounts",
+            "parties": ["web-gui", "people-service"]
+        },
+        {
+            "unique-id": "web-gui-to-trade-feed",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "web-gui"
+                    },
+                    "destination": {
+                        "node": "trade-feed"
+                    }
+                }
+            },
+            "description": "Web GUI subscribes to Trade Feed for live trade and position updates",
+            "parties": ["web-gui", "trade-feed"]
+        },
+        {
+            "unique-id": "trade-service-to-security-master",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-service"
+                    },
+                    "destination": {
+                        "node": "security-master"
+                    }
+                }
+            },
+            "description": "Trade Service validates ticker symbols before processing trade requests",
+            "parties": ["trade-service", "security-master"]
+        },
+        {
+            "unique-id": "trade-service-to-account-service",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-service"
+                    },
+                    "destination": {
+                        "node": "account-service"
+                    }
+                }
+            },
+            "description": "Trade Service validates account existence before processing trade requests",
+            "parties": ["trade-service", "account-service"]
+        },
+        {
+            "unique-id": "trade-service-to-trade-feed",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-service"
+                    },
+                    "destination": {
+                        "node": "trade-feed"
+                    }
+                }
+            },
+            "description": "Trade Service publishes new trade events after validation",
+            "parties": ["trade-service", "trade-feed"]
+        },
+        {
+            "unique-id": "account-service-to-trade-data-store",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "account-service"
+                    },
+                    "destination": {
+                        "node": "trade-data-store"
+                    }
+                }
+            },
+            "description": "Account Service queries and writes account data and account-user mappings",
+            "parties": ["account-service", "trade-data-store"]
+        },
+        {
+            "unique-id": "position-service-to-trade-data-store",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "position-service"
+                    },
+                    "destination": {
+                        "node": "trade-data-store"
+                    }
+                }
+            },
+            "description": "Position Service queries trades and positions for account blotters",
+            "parties": ["position-service", "trade-data-store"]
+        },
+        {
+            "unique-id": "people-service-to-user-directory",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "people-service"
+                    },
+                    "destination": {
+                        "node": "user-directory"
+                    }
+                }
+            },
+            "description": "People Service queries user profiles for search and retrieval operations",
+            "parties": ["people-service", "user-directory"]
+        },
+        {
+            "unique-id": "trade-processor-to-trade-feed-subscribe",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-processor"
+                    },
+                    "destination": {
+                        "node": "trade-feed"
+                    }
+                }
+            },
+            "description": "Trade Processor receives new trade events from Trade Feed for processing",
+            "parties": ["trade-processor", "trade-feed"]
+        },
+        {
+            "unique-id": "trade-processor-to-trade-data-store",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-processor"
+                    },
+                    "destination": {
+                        "node": "trade-data-store"
+                    }
+                }
+            },
+            "description": "Trade Processor inserts trades and updates positions in the Trade Data Store",
+            "parties": ["trade-processor", "trade-data-store"]
+        },
+        {
+            "unique-id": "trade-processor-to-trade-feed-publish",
+            "relationship-type": {
+                "connects": {
+                    "source": {
+                        "node": "trade-processor"
+                    },
+                    "destination": {
+                        "node": "trade-feed"
+                    }
+                }
+            },
+            "description": "Trade Processor publishes account-specific trade events and position updates",
+            "parties": ["trade-processor", "trade-feed"]
+        }
+    ]
+}

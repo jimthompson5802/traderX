@@ -11,6 +11,51 @@
             "architecture-style": "Event-Driven"
         }
     ],
+    "controls": {
+        "encryption-in-transit": {
+            "description": "All data transmitted between system components must be encrypted using TLS 1.3 or higher with modern cipher suites, validated certificates, and mutual TLS recommended for service-to-service communication",
+            "requirements": [
+                {
+                    "requirement-url": "https://schemas.company.com/security/tls-encryption.json",
+                    "config": {
+                        "protocol": "TLS",
+                        "minimum-version": "1.3",
+                        "cipher-suites": [
+                            "TLS_AES_256_GCM_SHA384",
+                            "TLS_CHACHA20_POLY1305_SHA256",
+                            "TLS_AES_128_GCM_SHA256"
+                        ],
+                        "certificate-validation": "required",
+                        "mutual-tls-recommended": true,
+                        "applies-to": "all inter-component communication"
+                    }
+                }
+            ]
+        },
+        "encryption-at-rest": {
+            "description": "All stored data must be encrypted at rest using AES-256 equivalent encryption with hardware-backed or managed key systems, regular key rotation (every 90 days), applied to databases, file systems, object storage, and backups",
+            "requirements": [
+                {
+                    "requirement-url": "https://schemas.company.com/security/data-encryption.json",
+                    "config": {
+                        "encryption-algorithm": "AES-256",
+                        "key-management": "hardware-backed or managed key system",
+                        "key-rotation-period": "90-days",
+                        "applies-to": [
+                            "databases",
+                            "file systems",
+                            "object storage",
+                            "backups"
+                        ],
+                        "cipher-modes": [
+                            "GCM",
+                            "CBC"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
     "nodes": [
         {
             "unique-id": "trader",

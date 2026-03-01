@@ -5,8 +5,10 @@
     "description": "An event-driven trading system architecture supporting order submission, account management, position tracking, and real-time trade updates",
     "metadata": [
         {
-            "version": "1.0.0",
-            "created-by": "Architecture Team",
+            "name": "Trading System",
+            "description": "An event-driven trading system architecture supporting order submission, account management, position tracking, and real-time trade processing.",
+            "version": "0.1.0",
+            "created-by": "Trading System Team - Copilot",
             "business-domain": "Capital Markets",
             "architecture-style": "Event-Driven"
         }

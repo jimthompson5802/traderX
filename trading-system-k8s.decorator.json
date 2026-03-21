@@ -1,0 +1,169 @@
+{
+  "$schema": "https://calm.finos.org/release/1.2/meta/calm-decorator.json",
+  "unique-id": "trading-system-k8s-deployment",
+  "type": "deployment",
+  "target": [
+    "trading-system.architecture.json"
+  ],
+  "applies-to": [
+    "account-service",
+    "trade-service",
+    "position-service",
+    "trade-processor",
+    "security-master",
+    "people-service",
+    "trade-feed",
+    "trade-data-store",
+    "user-directory",
+    "web-gui"
+  ],
+  "data": {
+    "platform": "kubernetes",
+    "cluster": "trading-prod",
+    "namespace": "trading-system",
+    "deployment-strategy": "rolling-update",
+    "services": {
+      "account-service": {
+        "replicas": 3,
+        "image": "trading/account-service:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "500m", "memory": "1Gi" },
+          "limits": { "cpu": "1000m", "memory": "2Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18088,
+        "health-checks": {
+          "liveness": "/actuator/health/liveness",
+          "readiness": "/actuator/health/readiness"
+        },
+        "env": [
+          { "name": "DB_HOST", "value": "trade-data-store" },
+          { "name": "DB_PORT", "value": "5432" }
+        ]
+      },
+      "trade-service": {
+        "replicas": 5,
+        "image": "trading/trade-service:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "1000m", "memory": "2Gi" },
+          "limits": { "cpu": "2000m", "memory": "4Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18092,
+        "health-checks": {
+          "liveness": "/actuator/health/liveness",
+          "readiness": "/actuator/health/readiness"
+        }
+      },
+      "position-service": {
+        "replicas": 3,
+        "image": "trading/position-service:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "500m", "memory": "1Gi" },
+          "limits": { "cpu": "1000m", "memory": "2Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18090
+      },
+      "trade-processor": {
+        "replicas": 2,
+        "image": "trading/trade-processor:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "1000m", "memory": "2Gi" },
+          "limits": { "cpu": "2000m", "memory": "4Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18091
+      },
+      "security-master": {
+        "replicas": 2,
+        "image": "trading/security-master:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "250m", "memory": "512Mi" },
+          "limits": { "cpu": "500m", "memory": "1Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18085
+      },
+      "people-service": {
+        "replicas": 2,
+        "image": "trading/people-service:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "250m", "memory": "512Mi" },
+          "limits": { "cpu": "500m", "memory": "1Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18089
+      },
+      "trade-feed": {
+        "replicas": 3,
+        "image": "trading/trade-feed:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "500m", "memory": "1Gi" },
+          "limits": { "cpu": "1000m", "memory": "2Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 18086
+      },
+      "trade-data-store": {
+        "replicas": 1,
+        "image": "postgres:15",
+        "resources": {
+          "requests": { "cpu": "2000m", "memory": "4Gi" },
+          "limits": { "cpu": "4000m", "memory": "8Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 5432,
+        "persistent-volume": {
+          "size": "100Gi",
+          "storage-class": "fast-ssd"
+        }
+      },
+      "user-directory": {
+        "replicas": 1,
+        "image": "postgres:15",
+        "resources": {
+          "requests": { "cpu": "500m", "memory": "1Gi" },
+          "limits": { "cpu": "1000m", "memory": "2Gi" }
+        },
+        "service-type": "ClusterIP",
+        "port": 5432,
+        "persistent-volume": {
+          "size": "10Gi",
+          "storage-class": "standard"
+        }
+      },
+      "web-gui": {
+        "replicas": 2,
+        "image": "trading/web-gui:v1.0.0",
+        "resources": {
+          "requests": { "cpu": "250m", "memory": "512Mi" },
+          "limits": { "cpu": "500m", "memory": "1Gi" }
+        },
+        "service-type": "LoadBalancer",
+        "port": 80,
+        "ingress": {
+          "enabled": true,
+          "host": "trading.company.com",
+          "tls": true
+        }
+      }
+    },
+    "network-policies": {
+      "enabled": true,
+      "default-deny": true,
+      "allowed-connections": [
+        { "from": "web-gui", "to": ["account-service", "trade-service", "position-service", "security-master", "people-service", "trade-feed"] },
+        { "from": "trade-service", "to": ["security-master", "account-service", "trade-feed"] },
+        { "from": "account-service", "to": ["trade-data-store"] },
+        { "from": "position-service", "to": ["trade-data-store"] },
+        { "from": "trade-processor", "to": ["trade-data-store", "trade-feed"] },
+        { "from": "people-service", "to": ["user-directory"] }
+      ]
+    },
+    "monitoring": {
+      "prometheus": true,
+      "grafana-dashboard": "trading-system-overview"
+    }
+  }
+}

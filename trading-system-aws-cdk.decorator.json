@@ -1,0 +1,147 @@
+{
+    "$schema": "https://calm.finos.org/release/1.2/meta/decorators.json#/defs/decorator",
+    "unique-id": "trading-system-aws-deployment",
+    "type": "deployment",
+    "target": ["trading-system.architecture.json"],
+    "applies-to": [
+        "account-service",
+        "trade-service",
+        "position-service",
+        "trade-processor",
+        "security-master",
+        "people-service",
+        "trade-data-store",
+        "user-directory",
+        "trade-feed",
+        "web-gui"
+    ],
+    "data": {
+        "infrastructure-as-code": "AWS CDK",
+        "cdk-language": "TypeScript",
+        "aws-region": "us-east-1",
+        "account-id": "123456789012",
+        "vpc-id": "vpc-xxxxx",
+        "services": {
+            "account-service": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://account-service:latest",
+                "cpu": "1024",
+                "memory": "2048",
+                "desired-count": 3,
+                "target-group-arn": "arn:aws:elasticloadbalancing:...",
+                "security-groups": ["sg-account-service"],
+                "subnets": ["private-subnet-1a", "private-subnet-1b"],
+                "environment-variables": {
+                    "SPRING_PROFILES_ACTIVE": "production",
+                    "DB_HOST": "${trade-data-store.endpoint}"
+                },
+                "health-check-path": "/actuator/health"
+            },
+            "trade-service": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://trade-service:latest",
+                "cpu": "1024",
+                "memory": "2048",
+                "desired-count": 3,
+                "auto-scaling": {
+                    "min-capacity": 2,
+                    "max-capacity": 10,
+                    "target-cpu-utilization": 70
+                }
+            },
+            "position-service": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://position-service:latest",
+                "cpu": "1024",
+                "memory": "2048",
+                "desired-count": 3
+            },
+            "trade-processor": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://trade-processor:latest",
+                "cpu": "2048",
+                "memory": "4096",
+                "desired-count": 2
+            },
+            "security-master": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://security-master:latest",
+                "cpu": "512",
+                "memory": "1024",
+                "desired-count": 2
+            },
+            "people-service": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://people-service:latest",
+                "cpu": "512",
+                "memory": "1024",
+                "desired-count": 2
+            },
+            "trade-feed": {
+                "compute": "ECS Fargate",
+                "container-image": "ecr://trade-feed:latest",
+                "cpu": "1024",
+                "memory": "2048",
+                "desired-count": 2,
+                "sticky-sessions": true,
+                "websocket-support": true
+            },
+            "web-gui": {
+                "compute": "CloudFront + S3",
+                "s3-bucket": "trading-system-web-gui",
+                "cloudfront-distribution-id": "E1234567890ABC",
+                "certificate-arn": "arn:aws:acm:us-east-1:...",
+                "custom-domain": "trading.example.com"
+            },
+            "trade-data-store": {
+                "database": "RDS Aurora PostgreSQL",
+                "instance-class": "db.r6g.xlarge",
+                "engine-version": "14.7",
+                "multi-az": true,
+                "backup-retention-days": 30,
+                "encryption-at-rest": true,
+                "parameter-group": "trading-system-params",
+                "subnet-group": "private-db-subnets"
+            },
+            "user-directory": {
+                "database": "RDS Aurora PostgreSQL",
+                "instance-class": "db.r6g.large",
+                "engine-version": "14.7",
+                "multi-az": true,
+                "read-replicas": 2
+            }
+        },
+        "networking": {
+            "load-balancer": {
+                "type": "Application Load Balancer",
+                "arn": "arn:aws:elasticloadbalancing:...",
+                "scheme": "internet-facing",
+                "certificate-arn": "arn:aws:acm:..."
+            },
+            "vpc-endpoints": [
+                "com.amazonaws.us-east-1.ecr.api",
+                "com.amazonaws.us-east-1.ecr.dkr",
+                "com.amazonaws.us-east-1.logs"
+            ]
+        },
+        "observability": {
+            "cloudwatch-log-group": "/aws/ecs/trading-system",
+            "cloudwatch-dashboards": [
+                "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=TradingSystem"
+            ],
+            "x-ray-tracing": true,
+            "metrics-namespace": "TradingSystem"
+        },
+        "secrets-management": {
+            "secrets-manager-prefix": "/trading-system/",
+            "database-credentials": "trading-system/db-credentials",
+            "api-keys": "trading-system/api-keys"
+        },
+        "deployment-pipeline": {
+            "ci-cd-tool": "AWS CodePipeline",
+            "pipeline-name": "trading-system-pipeline",
+            "source-repo": "github.com/your-org/traderX",
+            "cdk-stack-name": "TradingSystemStack"
+        }
+    }
+}
